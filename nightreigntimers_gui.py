@@ -15,12 +15,12 @@ dbgflag = False  # Set to True for debugging, False for normal operation
 if dbgflag:
     minute = 1 # For debugging, set definition of a minute to lower value
 
-PHASE_1_SAFE_DURATION = 4.5 * minute
+DAY_1_SAFE_DURATION = 4.5 * minute
 RING_1_CLOSING_DURATION = 3 * minute
-PHASE_2_SAFE_DURATION = 3.5 * minute
+DAY_2_SAFE_DURATION = 3.5 * minute
 RING_2_CLOSING_DURATION = 3 * minute
 
-TOTAL_DURATION = int(PHASE_1_SAFE_DURATION + RING_1_CLOSING_DURATION + PHASE_2_SAFE_DURATION + RING_2_CLOSING_DURATION)
+TOTAL_DURATION = int(DAY_1_SAFE_DURATION + RING_1_CLOSING_DURATION + DAY_2_SAFE_DURATION + RING_2_CLOSING_DURATION)
 
 BEEP_WARNING_SECONDS = 5  # Seconds remaining to trigger beeps/flashes
 
@@ -113,8 +113,8 @@ def run_timers(resume_from_boss=False, elapsed_timer_start_time=None):
     # Set all labels to black/#808080 at the start
     if not resume_from_boss:
         window.after(0, lambda: [
-            labelring1.config(bg='#000000', fg='#cccccc', text="Phase 1 Safe Duration"),
-            labelring2.config(bg='#000000', fg='#cccccc', text="Phase 2 Safe Duration"),
+            labelring1.config(bg='#000000', fg='#cccccc', text="Day 1 Safe Duration"),
+            labelring2.config(bg='#000000', fg='#cccccc', text="Day 2 Safe Duration"),
             elapsed_label.config(bg='#000000', fg='#ffffff', text="Press [F8] to start/reset timer"),
             progring1.config(value=0),
             progring2.config(value=0)
@@ -123,13 +123,13 @@ def run_timers(resume_from_boss=False, elapsed_timer_start_time=None):
         start_time = elapsed_timer_start_time if elapsed_timer_start_time else time.time()
         elapsed_total = 0
     else:
-        # Resuming: skip to Phase 2, keep elapsed time
+        # Resuming: skip to Day 2, keep elapsed time
         start_time = elapsed_timer_start_time if elapsed_timer_start_time else time.time()
-        elapsed_total = PHASE_1_SAFE_DURATION + RING_1_CLOSING_DURATION
+        elapsed_total = DAY_1_SAFE_DURATION + RING_1_CLOSING_DURATION
 
-    # --- Phase 1 Safe Duration ---
+    # --- Day 1 Safe Duration ---
     if not resume_from_boss:
-        progring1['maximum'] = PHASE_1_SAFE_DURATION
+        progring1['maximum'] = DAY_1_SAFE_DURATION
         progring1['value'] = 0
         window.after(0, lambda: labelring1.config(bg='#00aa00', fg='#ffffff'))
         beeped1 = False
@@ -140,26 +140,26 @@ def run_timers(resume_from_boss=False, elapsed_timer_start_time=None):
             now = time.time()
             elapsed = now - start
             total_elapsed = now - start_time
-            remaining = PHASE_1_SAFE_DURATION - elapsed
+            remaining = DAY_1_SAFE_DURATION - elapsed
             # Beep logic for Safe Duration
             if not beeped1 and remaining < BEEP_WARNING_SECONDS:
                 threading.Thread(target=beep_notice, daemon=True).start()
                 beeped1 = True
-            if elapsed >= PHASE_1_SAFE_DURATION:
+            if elapsed >= DAY_1_SAFE_DURATION:
                 break
             def update():
                 progring1['value'] = elapsed
-                labelring1.config(text=f"Phase 1 Safe Duration - {format_time(remaining)}")
+                labelring1.config(text=f"Day 1 Safe Duration - {format_time(remaining)}")
             window.after(0, update)
             time.sleep(0.2)
         window.after(0, lambda: [
-            progring1.config(value=PHASE_1_SAFE_DURATION),
-            labelring1.config(text="Phase 1 Safe Duration - 00:00")
+            progring1.config(value=DAY_1_SAFE_DURATION),
+            labelring1.config(text="Day 1 Safe Duration - 00:00")
         ])
         time.sleep(0.2)
-        window.after(0, lambda: labelring1.config(text=f"Phase 1 Ring Closing - {format_time(RING_1_CLOSING_DURATION)}"))
+        window.after(0, lambda: labelring1.config(text=f"Day 1 Ring Closing - {format_time(RING_1_CLOSING_DURATION)}"))
 
-        # --- Phase 1 Ring Closing (flashing) ---
+        # --- Day 1 Ring Closing (flashing) ---
         progring1['maximum'] = RING_1_CLOSING_DURATION
         progring1['value'] = 0
         flash = False
@@ -178,13 +178,13 @@ def run_timers(resume_from_boss=False, elapsed_timer_start_time=None):
                 progring1['value'] = elapsed
                 flash = not flash
                 progring1.config(style='Red.Horizontal.TProgressbar' if flash else 'Default.Horizontal.TProgressbar')
-                labelring1.config(bg='#ff0000', fg='#ffffff', text=f"Phase 1 Ring Closing - {format_time(remaining)}")
+                labelring1.config(bg='#ff0000', fg='#ffffff', text=f"Day 1 Ring Closing - {format_time(remaining)}")
                 #elapsed_label.config(text=f"{format_time(total_elapsed)}")
             window.after(0, update)
             time.sleep(0.2)
         window.after(0, lambda: [
             progring1.config(style='Default.Horizontal.TProgressbar', value=RING_1_CLOSING_DURATION),
-            labelring1.config(bg='#808080', fg='#ffffff', text="Phase 1 Ring Completed")
+            labelring1.config(bg='#808080', fg='#ffffff', text="Day 1 Ring Completed")
         ])
         time.sleep(0.2)
 
@@ -195,8 +195,8 @@ def run_timers(resume_from_boss=False, elapsed_timer_start_time=None):
         window.after(0, lambda: elapsed_label.config(text="Boss fight! Press [F8] when ready to resume."))
         return  # Exit thread, wait for F8 to resume
 
-    # --- Phase 2 Safe Duration ---
-    progring2['maximum'] = PHASE_2_SAFE_DURATION
+    # --- Day 2 Safe Duration ---
+    progring2['maximum'] = DAY_2_SAFE_DURATION
     progring2['value'] = 0
     window.after(0, lambda: labelring2.config(bg='#00aa00', fg='#ffffff'))
     beeped2 = False
@@ -207,27 +207,27 @@ def run_timers(resume_from_boss=False, elapsed_timer_start_time=None):
         now = time.time()
         elapsed = now - start
         total_elapsed = elapsed_total + elapsed
-        remaining = PHASE_2_SAFE_DURATION - elapsed
+        remaining = DAY_2_SAFE_DURATION - elapsed
         # Beep logic for Safe Duration
         if not beeped2 and remaining < BEEP_WARNING_SECONDS:
             threading.Thread(target=beep_notice, daemon=True).start()
             beeped2 = True
-        if elapsed >= PHASE_2_SAFE_DURATION:
+        if elapsed >= DAY_2_SAFE_DURATION:
             break
         def update():
             progring2['value'] = elapsed
-            labelring2.config(text=f"Phase 2 Safe Duration - {format_time(remaining)}")
+            labelring2.config(text=f"Day 2 Safe Duration - {format_time(remaining)}")
             #elapsed_label.config(text=f"{format_time(total_elapsed)}")
         window.after(0, update)
         time.sleep(0.2)
     window.after(0, lambda: [
-        progring2.config(value=PHASE_2_SAFE_DURATION),
-        labelring2.config(text="Phase 2 Safe Duration - 00:00")
+        progring2.config(value=DAY_2_SAFE_DURATION),
+        labelring2.config(text="Day 2 Safe Duration - 00:00")
     ])
     time.sleep(0.2)
-    window.after(0, lambda: labelring2.config(text=f"Phase 2 Ring Closing - {format_time(RING_2_CLOSING_DURATION)}"))
+    window.after(0, lambda: labelring2.config(text=f"Day 2 Ring Closing - {format_time(RING_2_CLOSING_DURATION)}"))
 
-    # --- Phase 2 Ring Closing (flashing) ---
+    # --- Day 2 Ring Closing (flashing) ---
     progring2['maximum'] = RING_2_CLOSING_DURATION
     progring2['value'] = 0
     flash = False
@@ -237,7 +237,7 @@ def run_timers(resume_from_boss=False, elapsed_timer_start_time=None):
             return
         now = time.time()
         elapsed = now - start
-        total_elapsed = elapsed_total + PHASE_2_SAFE_DURATION + elapsed
+        total_elapsed = elapsed_total + DAY_2_SAFE_DURATION + elapsed
         remaining = RING_2_CLOSING_DURATION - elapsed
         if elapsed >= RING_2_CLOSING_DURATION:
             break
@@ -246,13 +246,13 @@ def run_timers(resume_from_boss=False, elapsed_timer_start_time=None):
             progring2['value'] = elapsed
             flash = not flash
             progring2.config(style='Red.Horizontal.TProgressbar' if flash else 'Default.Horizontal.TProgressbar')
-            labelring2.config(bg='#ff0000', fg='#ffffff', text=f"Phase 2 Ring Closing - {format_time(remaining)}")
+            labelring2.config(bg='#ff0000', fg='#ffffff', text=f"Day 2 Ring Closing - {format_time(remaining)}")
             #elapsed_label.config(text=f"{format_time(total_elapsed)}")
         window.after(0, update)
         time.sleep(0.2)
     window.after(0, lambda: [
         progring2.config(style='Default.Horizontal.TProgressbar', value=RING_2_CLOSING_DURATION),
-        labelring2.config(bg='#808080', fg='#ffffff', text="Phase 2 Ring Completed")
+        labelring2.config(bg='#808080', fg='#ffffff', text="Day 2 Ring Completed")
     ])
     time.sleep(0.2)
 
@@ -265,8 +265,8 @@ def main_gui():
     global labelring1, labelring2, elapsed_label
 
     window = tk.Tk()
-    window.title("Corwin's Vibecode Nightreign Timers")
-    window.geometry("610x450")  # Wider window for info panel
+    window.title("Corwin's Vibecode NIGHTREIGN Timers")
+    window.geometry("585x450")  # Wider window for info panel
     window.configure(bg='#000000')
     window.resizable(False, False)
 
@@ -282,17 +282,17 @@ def main_gui():
     
     timer_frame.place(x=0, y=0, width=400, height=360)
 
-    labeltitle = tk.Label(timer_frame, text="Nightreign Timers", font=("Helvetica", 16, "bold"), bg='#000000', fg='#ffffff')
+    labeltitle = tk.Label(timer_frame, text="NIGHTREIGN Timers", font=("Helvetica", 16, "bold"), bg='#000000', fg='#ffffff')
     labeltitle.pack(pady=10, anchor='w', padx=20)
 
-    labelring1 = tk.Label(timer_frame, text="Phase 1 Safe Duration", font=("Helvetica", 14), bg='#000000', fg='#cccccc')
+    labelring1 = tk.Label(timer_frame, text="Day 1 Safe Duration", font=("Helvetica", 14), bg='#000000', fg='#cccccc')
     labelring1.pack(pady=5, anchor='w', padx=20)
-    progring1 = ttk.Progressbar(timer_frame, length=300, mode='determinate', maximum=PHASE_1_SAFE_DURATION, style='Green.Horizontal.TProgressbar')
+    progring1 = ttk.Progressbar(timer_frame, length=300, mode='determinate', maximum=DAY_1_SAFE_DURATION, style='Green.Horizontal.TProgressbar')
     progring1.pack(pady=5, anchor='w', padx=20)
 
-    labelring2 = tk.Label(timer_frame, text="Phase 2 Safe Duration", font=("Helvetica", 14), bg='#000000', fg='#cccccc')
+    labelring2 = tk.Label(timer_frame, text="Day 2 Safe Duration", font=("Helvetica", 14), bg='#000000', fg='#cccccc')
     labelring2.pack(pady=5, anchor='w', padx=20)
-    progring2 = ttk.Progressbar(timer_frame, length=300, mode='determinate', maximum=PHASE_2_SAFE_DURATION, style='Green.Horizontal.TProgressbar')
+    progring2 = ttk.Progressbar(timer_frame, length=300, mode='determinate', maximum=DAY_2_SAFE_DURATION, style='Green.Horizontal.TProgressbar')
     progring2.pack(pady=5, anchor='w', padx=20)
 
     elapsed_label = tk.Label(
@@ -306,12 +306,17 @@ def main_gui():
     )
     elapsed_label.pack(pady=20, anchor='w', padx=20)
 
+    # Add a spacer to push the Exit button lower
+    spacer = tk.Label(timer_frame, text="", bg='#000000', height=3)
+    spacer.pack()
+
     button = tk.Button(timer_frame, text="Exit", command=window.quit)
+    button.configure(font=("Helvetica", 12), bg='#000000', fg='#ffffff', activebackground='#000000', activeforeground='#ffffff')
     button.pack(pady=10, anchor='w', padx=20)
 
     # --- Info Panel (right) ---
     info_frame = tk.Frame(window, bg='#222222', bd=2, relief='groove')
-    info_frame.place(x=345, y=10, width=250, height=425) 
+    info_frame.place(x=345, y=10, width=225, height=425) 
 
     info_title = tk.Label(info_frame, text="Leveling Rune Cost", font=("Helvetica", 12, "bold"), bg='#222222', fg='#ffff66')
     info_title.grid(row=0, column=0, columnspan=3, pady=(5, 2))

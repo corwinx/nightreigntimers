@@ -3,7 +3,7 @@
 ## Elden Ring: Nightreign assistant
 ![Nightreigntimers interface.](screenshot01.jpg)
 
-Written in Python
+Written in Python / vibecode
 
 Features:
 - Global hotkey to start/reset timer
