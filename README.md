@@ -6,9 +6,9 @@
 Written in Python / vibecode
 
 Features:
-- Global hotkey to start/reset timer
+- Global hotkey to start/reset timer (Default: F8)
 - Audible tones, seconds before storm starts closing in
 - Leveling Rune Cost reference (current level cost, total running costs)
 
-All imports should be standard, except maybe this one:
+The only non-standard import might be 'keyboard', so:
 > pip install keyboard
