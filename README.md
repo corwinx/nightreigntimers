@@ -14,5 +14,8 @@ Features:
 
 Also available as an in-game overlay
 
-The only non-standard import might be 'keyboard', so:
+Non-standard python imports for the regular app:
 > pip install keyboard
+
+Non-standard python imports for the overlay app:
+> pip install keyboard psutil pystray

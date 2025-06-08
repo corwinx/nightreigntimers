@@ -2,6 +2,10 @@ import time
 import tkinter as tk
 from tkinter import ttk
 import threading
+import psutil
+import pygetwindow as gw
+import pystray
+from PIL import Image, ImageDraw
 
 minute = 60
 dbgflag = False  # Set to True for debugging mode
@@ -44,13 +48,16 @@ class OverlayTimers:
         self.phase_start_time = None
         self.total_duration = sum(PHASE_DURATIONS)
         self.total_elapsed = 0
+        self.tray_icon = None
         self._setup_overlay()
         self._setup_gui()
         self.window.after(200, self.update_ui)
+        self.check_game_focus()  # Start periodic check
+        threading.Thread(target=self.setup_tray, daemon=True).start()
 
     def _setup_overlay(self):
         # Make the window borderless, always on top, and transparent background
-        self.window.overrideredirect(True)
+        self.window.overrideredirect(True) # also hides from taskbar
         self.window.attributes('-topmost', True)
         self.window.attributes('-alpha', 0.70)  # Slight transparency
         self.window.configure(bg='#222222')
@@ -204,6 +211,57 @@ class OverlayTimers:
         mins = int(secs) // 60
         s = int(secs) % 60
         return f"{mins:02}:{s:02}"
+
+    def check_game_focus(self):
+        # Check if nightreign.exe is running and in focus
+        game_running = False
+        game_focused = False
+
+        # Check if process is running
+        for proc in psutil.process_iter(['name']):
+            if proc.info['name'] and proc.info['name'].lower() == 'nightreign.exe':
+                game_running = True
+                break
+
+        # Check if window is focused
+        if game_running:
+            try:
+                active = gw.getActiveWindow()
+                if active and 'nightreign' in active.title.lower():
+                    game_focused = True
+            except Exception:
+                pass
+
+        if game_running and game_focused:
+            self.window.deiconify()
+            self.window.attributes('-topmost', True)
+        else:
+            self.window.withdraw()
+
+        # Check again in 1 second
+        self.window.after(1000, self.check_game_focus)
+
+    def setup_tray(self):
+        # Create a simple icon
+        icon_size = 64
+        image = Image.new('RGBA', (icon_size, icon_size), (34, 34, 34, 255))
+        draw = ImageDraw.Draw(image)
+        draw.ellipse((16, 16, 48, 48), fill=(68, 126, 251, 255))  # blue circle
+        draw.rectangle((28, 28, 36, 36), fill=(0, 170, 0, 255))   # green square
+
+        menu = pystray.Menu(
+            pystray.MenuItem('[Overlay hidden while nightreign.exe not in foreground]', '', enabled=False),
+            pystray.Menu.SEPARATOR,
+            pystray.MenuItem('Exit', self.on_tray_exit)            
+        )
+        self.tray_icon = pystray.Icon("NightreignTimers", image, "Nightreign Timers Overlay", menu)
+        self.tray_icon.run()
+
+    def on_tray_exit(self, icon, item):
+        # Clean exit for both tray and app
+        if self.tray_icon:
+            self.tray_icon.stop()
+        self.window.quit()
 
 def main():
     window = tk.Tk()
