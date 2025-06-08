@@ -266,7 +266,7 @@ def main_gui():
 
     window = tk.Tk()
     window.title("Corwin's Vibecode Nightreign Timers")
-    window.geometry("610x380")  # Wider window for info panel
+    window.geometry("610x450")  # Wider window for info panel
     window.configure(bg='#000000')
     window.resizable(False, False)
 
@@ -311,7 +311,7 @@ def main_gui():
 
     # --- Info Panel (right) ---
     info_frame = tk.Frame(window, bg='#222222', bd=2, relief='groove')
-    info_frame.place(x=345, y=10, width=250, height=350)  # Wider panel, more to the right
+    info_frame.place(x=345, y=10, width=250, height=425) 
 
     info_title = tk.Label(info_frame, text="Leveling Rune Cost", font=("Helvetica", 12, "bold"), bg='#222222', fg='#ffff66')
     info_title.grid(row=0, column=0, columnspan=3, pady=(5, 2))
@@ -335,6 +335,9 @@ def main_gui():
         ("10", "43,335", "202,729"),
         ("11", "49,271", "252,000"),
         ("12", "55,439", "307,439"),
+        ("13", "61,840", "369,279"),
+        ("14", "68,479", "437,758"),
+        ("15", "75,358", "513,116"),
     ]
     for row, (rounded, cost, total) in enumerate(data, start=2):
         tk.Label(info_frame, text=rounded, bg='#222222', fg='#ffffff', font=("Helvetica", 10)).grid(row=row, column=0, padx=8, pady=1, sticky='w')
