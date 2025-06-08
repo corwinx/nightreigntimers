@@ -8,7 +8,7 @@ import math
 minute = 60
 dbgflag = False  # Set to True for debugging mode
 if dbgflag:
-    minute = 5 # Debugging mode: speed up to 3 seconds per minute
+    minute = 3 # Debugging mode: speed up to x seconds per minute
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # 8 phases: [Safe, Closing, Safe, Closing] x 2 days
