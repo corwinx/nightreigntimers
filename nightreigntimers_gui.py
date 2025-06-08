@@ -4,9 +4,10 @@ from tkinter import ttk
 import keyboard
 import logging
 import math
+import threading
 
 minute = 60
-dbgflag = False  # Set to True for debugging mode
+dbgflag = True  # Set to True for debugging mode
 if dbgflag:
     minute = 3 # Debugging mode: speed up to x seconds per minute
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -123,30 +124,32 @@ class NIGHTREIGNTimers:
 
         # Level and cost data
         level_costs = [
-            ("1", 0),
-            ("2", 3698),
-            ("3", 7922),
-            ("4", 12348),
-            ("5", 16978),
-            ("6", 21818),
-            ("7", 26869),
-            ("8", 32137),
-            ("9", 37624),
-            ("10", 43335),
-            ("11", 49271),
-            ("12", 55439),
-            ("13", 61840),
-            ("14", 68479),
-            ("15", 75358),
+            (0),
+            (3698),
+            (7922),
+            (12348),
+            (16978),
+            (21818),
+            (26869),
+            (32137),
+            (37624),
+            (43335),
+            (49271),
+            (55439),
+            (61840),
+            (68479),
+            (75358),
         ]
         running_total = 0
-        for row_idx, (level, cost) in enumerate(level_costs, start=2):
+        level = 0
+        for row_idx, (cost) in enumerate(level_costs, start=2):
             running_total += cost
+            level += 1
             tk.Label(info_frame, text=level, bg='#222222', fg='#ffffff', font=("Helvetica", 10)).grid(row=row_idx, column=0, padx=4, pady=1, sticky='w')
             tk.Label(info_frame, text=str(cost), bg='#222222', fg='#ffffff', font=("Helvetica", 10)).grid(row=row_idx, column=1, padx=4, pady=1, sticky='w')
             tk.Label(info_frame, text=str(running_total), bg='#222222', fg='#ffffff', font=("Helvetica", 10)).grid(row=row_idx, column=2, padx=4, pady=1, sticky='w')
 
-        # Adjust window size and progress bar frame position to fit new layout
+        # Adjust window size and progress bar frame position to fit layout
         self.window.geometry("640x465")
         frame.place(x=20, y=20) 
 
@@ -179,12 +182,15 @@ class NIGHTREIGNTimers:
         self.instruction.config(text="Press [F8] to start/reset timer")
 
     def beep_notice(self):
-        if HAS_WINSOUND:
-            winsound.Beep(130, 400)
-            winsound.Beep(110, 300)
-            winsound.Beep(98, 500)            
-        else:
-            self.window.bell()
+        # Run the beep in a separate thread so the UI doesn't freeze
+        def do_beep():
+            if HAS_WINSOUND:
+                winsound.Beep(130, 400)
+                winsound.Beep(110, 300)
+                winsound.Beep(98, 500)
+            else:
+                self.window.bell()
+        threading.Thread(target=do_beep, daemon=True).start()
 
     def update_instruction(self):
         if self.paused_for_boss:
